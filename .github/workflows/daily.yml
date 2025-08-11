@@ -1,0 +1,40 @@
+name: Daily AgriWeather Update
+
+on:
+  schedule:
+    - cron: "10 0 * * *"   # 매일 09:10 KST (UTC+9)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Fetch CSV (서둔동)
+        env:
+          SERVICE_KEY: ${{ secrets.AGRI365_SERVICE_KEY }}
+          STATION_CODE: ${{ secrets.STATION_CODE }}
+        run: |
+          python fetch_agri365_to_csv_v2.py \
+            --service-key "$SERVICE_KEY" \
+            --station "${STATION_CODE:-441707D001}" \
+            --start 2025-06-28 \
+            --out input_daily_avgtemp.csv
+
+      - name: Commit updated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add input_daily_avgtemp.csv
+          git commit -m "daily update: csv" || echo "nothing to commit"
+          git push
