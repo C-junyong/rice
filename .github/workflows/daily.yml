@@ -38,13 +38,3 @@ jobs:
           git add input_daily_avgtemp.csv
           git commit -m "daily update: csv" || echo "nothing to commit"
           git push
-      - name: Compute degree-day summary
-        run: |
-          python compute_degree_days_allstarts.py --start 2025-06-28
-      - name: Commit updated files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add input_daily_avgtemp.csv degree_1000_summary.csv
-          git commit -m "daily update: csv + summary" || echo "nothing to commit"
-          git push
