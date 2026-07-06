@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 CSV_PATH = "input_daily_avgtemp.csv"
-DEFAULT_START = date(2025, 6, 28)   # 자동 보정 없음(범위 밖이면 에러)
+DEFAULT_START = date(2026, 6, 28)   # 자동 보정 없음(범위 밖이면 에러)
 THRESHOLD = 1000.0
 
 st.set_page_config(page_title="적산온도 1000℃ 모니터", layout="wide")
