@@ -1,0 +1,47 @@
+name: Daily AgriWeather fetch
+
+# 매일 자동 실행 + 수동 실행 버튼
+on:
+  schedule:
+    # GitHub Actions cron은 UTC 기준입니다.
+    # '0 20 * * *' = 매일 20:00 UTC = 다음날 05:00 KST (전날까지 데이터 수집)
+    # 원하는 시각으로 바꾸려면: (원하는 KST 시각 - 9시간)을 UTC로 넣으세요.
+    - cron: '0 20 * * *'
+  workflow_dispatch:        # Actions 탭에서 손으로 즉시 실행할 수 있는 버튼
+
+# CSV를 커밋/푸시하려면 쓰기 권한이 필요합니다.
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch daily average temperature
+        env:
+          # 인증키는 코드가 아니라 저장소 Secret에서 주입 (아래 안내 참고)
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: python fetch_agri365_to_csv_v3.py --skip-bad-months
+
+      - name: Commit & push if the CSV changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add input_daily_avgtemp.csv
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+          else
+            git commit -m "chore: update daily avg temp ($(date -u +%Y-%m-%d) UTC)"
+            git push
+          fi
