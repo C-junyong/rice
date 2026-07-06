@@ -23,7 +23,7 @@ import pandas as pd
 #    환경변수 DATA_GO_KR_SERVICE_KEY(또는 Streamlit secrets)로 넣어 쓰세요.
 SERVICE_KEY_FALLBACK = ""  # 여기 비워두고 환경변수로 주입하는 것을 권장
 STATION_DEFAULT      = "441707D001"       # 수원시 서둔동
-START_DEFAULT        = "2025-06-28"
+START_DEFAULT        = "2026-06-28"
 OUT_DEFAULT          = "input_daily_avgtemp.csv"
 # =======================
 
