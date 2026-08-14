@@ -221,6 +221,9 @@ def main():
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=["date", "tavg"])
     if not df.empty:
         df = df[(df["date"] >= start_date) & (df["date"] <= today)].sort_values("date").reset_index(drop=True)
+    if df.empty:
+        print("[중단] 새로 가져온 데이터가 없어 기존 CSV를 보존합니다 (덮어쓰지 않음).")
+        return
     df.to_csv(args.out, index=False, encoding="utf-8-sig")
 
     if df.empty:
