@@ -6,7 +6,11 @@ on:
     # GitHub Actions cron은 UTC 기준입니다.
     # '0 20 * * *' = 매일 20:00 UTC = 다음날 05:00 KST (전날까지 데이터 수집)
     # 원하는 시각으로 바꾸려면: (원하는 KST 시각 - 9시간)을 UTC로 넣으세요.
-    - cron: '0 20 * * *'
+    - cron: '0 22 * * *'   # 07:00 KST
+    - cron: '0 1 * * *'    # 10:00 KST
+    - cron: '0 4 * * *'    # 13:00 KST
+    - cron: '0 7 * * *'    # 16:00 KST
+
   workflow_dispatch:        # Actions 탭에서 손으로 즉시 실행할 수 있는 버튼
 
 # CSV를 커밋/푸시하려면 쓰기 권한이 필요합니다.
