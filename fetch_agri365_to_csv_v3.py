@@ -221,15 +221,46 @@ def main():
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=["date", "tavg"])
     if not df.empty:
         df = df[(df["date"] >= start_date) & (df["date"] <= today)].sort_values("date").reset_index(drop=True)
-    if df.empty:
-        print("[중단] 새로 가져온 데이터가 없어 기존 CSV를 보존합니다 (덮어쓰지 않음).")
-        return
-    df.to_csv(args.out, index=False, encoding="utf-8-sig")
 
+    # ── 가드 1: 아무것도 못 받았으면 기존 CSV 보존 ──────────────────────────
     if df.empty:
-        print(f"[완료] {args.out} 저장: 데이터 없음")
-    else:
-        print(f"[완료] {args.out} 저장: {df['date'].min()} ~ {df['date'].max()} ({len(df)}일)")
+        print("[보존] 새로 가져온 데이터가 없어 기존 CSV를 유지합니다 (덮어쓰지 않음).")
+        return
+
+    new_max, new_rows = df["date"].max(), len(df)
+
+    # ── 가드 2: 기존 CSV보다 '뒤로 가는' 결과면 덮어쓰지 않는다 ────────────
+    #   --skip-bad-months 로 특정 월(예: 8월) 요청이 실패하면 6~7월만 담긴
+    #   '부분 응답'이 만들어질 수 있다. 그 부분 응답이 정상 CSV를 덮어써
+    #   최신 날짜가 과거로 후퇴하거나 8월이 통째로 사라지는 사고를 막는다.
+    #     · 최신 날짜 후퇴(new_max < old_max)  또는
+    #     · 행 수 감소(new_rows < old_rows)      → 부분 응답으로 보고 중단(빨간 실패)
+    #   같은 최신일·같은 행수면 변경이 없는 것이므로 조용히 종료(커밋도 안 됨).
+    if os.path.exists(args.out):
+        try:
+            old = pd.read_csv(args.out, encoding="utf-8-sig")
+            old["date"] = pd.to_datetime(old["date"], errors="coerce").dt.date
+            old = old.dropna(subset=["date"])
+        except Exception as e:
+            old = pd.DataFrame(columns=["date", "tavg"])
+            print(f"[경고] 기존 CSV 비교 실패({e}) — 후퇴 검사 건너뜀.")
+
+        if not old.empty:
+            old_max, old_rows = old["date"].max(), len(old)
+            if new_max < old_max or new_rows < old_rows:
+                # 데이터를 쓰지 않고 비정상 종료 → Actions에서 '빨간 실패'로 드러남
+                raise SystemExit(
+                    f"[중단·후퇴감지] 새 데이터가 기존보다 뒤로 갑니다 "
+                    f"(기존 최신={old_max}/{old_rows}행 → 새 최신={new_max}/{new_rows}행). "
+                    f"부분 응답으로 판단하여 기존 CSV를 보존합니다. "
+                    f"data.go.kr(AgriWeather) 상태를 확인하세요."
+                )
+            if new_max == old_max and new_rows == old_rows:
+                print(f"[변경 없음] 최신일 {new_max} 그대로 — 기존 CSV 유지, 커밋 생략.")
+                return
+
+    df.to_csv(args.out, index=False, encoding="utf-8-sig")
+    print(f"[완료] {args.out} 저장: {df['date'].min()} ~ {df['date'].max()} ({len(df)}일)")
 
 
 if __name__ == "__main__":
