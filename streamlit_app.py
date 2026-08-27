@@ -62,9 +62,9 @@ for s in df.loc[df["date"] >= start_date, "date"]:
     reached = bool((seg["cum_deg"] >= threshold).any())
     if reached:
         hitrow = seg.loc[seg["cum_deg"] >= threshold].iloc[0]
-        chisang = hitrow["date"]                       # 치상일 = 최초 임계 도달일
+        chisang = hitrow["date"] + timedelta(days=1)   # 도달 다음날(해당일 평균온도 익일 공개 → 실행가능일)
         hit_val = float(hitrow["cum_deg"])             # 도달적산온도
-        tagging = chisang + timedelta(days=7)          # 태깅일 = 치상일 + 7일
+        tagging = chisang + timedelta(days=7)          # 리딩일 = 치상일 + 7일
     else:
         chisang = None
         hit_val = None
@@ -79,7 +79,7 @@ for s in df.loc[df["date"] >= start_date, "date"]:
         "도달여부": "TRUE" if reached else "FALSE",
         "치상일": chisang,
         "도달적산온도": hit_val,
-        "태깅일(치상+7일)": tagging,
+        "리딩일(치상+7일)": tagging,
     })
 
 table = pd.DataFrame(rows)
@@ -94,7 +94,7 @@ else:
     st.success(
         f"🟢 가장 마지막 {int(threshold)}℃ 도달: **치상일 {last_row['치상일']}** "
         f"(시작일 {last_row['날짜']}, 도달적산온도 {last_row['도달적산온도']:.1f}, "
-        f"태깅일 {last_row['태깅일(치상+7일)']})"
+        f"리딩일 {last_row['리딩일(치상+7일)']})"
     )
 
 # 6) 표 표시 + 다운로드
@@ -106,7 +106,7 @@ st.dataframe(
         "적산온도": _fmt1,
         "도달적산온도": _fmt1,
         "치상일": _fmtd,
-        "태깅일(치상+7일)": _fmtd,
+        "리딩일(치상+7일)": _fmtd,
     }),
     width="stretch",   # ⑥ use_container_width=True → width="stretch"
     height=560,
