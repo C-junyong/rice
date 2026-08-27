@@ -3,13 +3,12 @@ name: Daily AgriWeather fetch
 # 매일 자동 실행 + 수동 실행 버튼
 on:
   schedule:
-    # GitHub Actions cron은 UTC 기준입니다.
-    # '0 20 * * *' = 매일 20:00 UTC = 다음날 05:00 KST (전날까지 데이터 수집)
-    # 원하는 시각으로 바꾸려면: (원하는 KST 시각 - 9시간)을 UTC로 넣으세요.
-    - cron: '0 22 * * *'   # 07:00 KST
-    - cron: '0 1 * * *'    # 10:00 KST
-    - cron: '0 4 * * *'    # 13:00 KST
-    - cron: '0 7 * * *'    # 16:00 KST
+    - cron: '37 22 * * *'  # 07:37 KST (일찍 공개되는 날)
+    - cron: '37 0 * * *'   # 09:37 KST
+    - cron: '37 1 * * *'   # 10:37 KST
+    - cron: '37 2 * * *'   # 11:37 KST
+    - cron: '37 4 * * *'   # 13:37 KST (백업)
+    - cron: '37 7 * * *'   # 16:37 KST (백업)
 
   workflow_dispatch:        # Actions 탭에서 손으로 즉시 실행할 수 있는 버튼
 
