@@ -3,14 +3,9 @@ name: Daily AgriWeather fetch
 # 매일 자동 실행 + 수동 실행 버튼
 on:
   schedule:
-    - cron: '37 22 * * *'  # 07:37 KST (일찍 공개되는 날)
-    - cron: '37 0 * * *'   # 09:37 KST
-    - cron: '37 1 * * *'   # 10:37 KST
-    - cron: '37 2 * * *'   # 11:37 KST
-    - cron: '37 4 * * *'   # 13:37 KST (백업)
-    - cron: '37 7 * * *'   # 16:37 KST (백업)
-
-  workflow_dispatch:        # Actions 탭에서 손으로 즉시 실행할 수 있는 버튼
+    - cron: '*/20 22-23 * * *'  # 07:00~08:40 KST (20분 간격)
+    - cron: '*/20 0-3 * * *'    # 09:00~12:40 KST (20분 간격)
+  workflow_dispatch:
 
 # CSV를 커밋/푸시하려면 쓰기 권한이 필요합니다.
 permissions:
